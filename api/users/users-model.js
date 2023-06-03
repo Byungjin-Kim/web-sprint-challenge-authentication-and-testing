@@ -2,7 +2,7 @@ const db = require('../../data/dbConfig');
 
 module.exports = {
     insert,
-    findBy
+    findBy,
 };
 
 async function insert(user) {
@@ -12,7 +12,8 @@ async function insert(user) {
 }
 
 async function findBy(filter) {
+    // console.log(filter)
     return await db('users')
-        .select('username')
+        .select('username', 'password')
         .where(filter)
 }

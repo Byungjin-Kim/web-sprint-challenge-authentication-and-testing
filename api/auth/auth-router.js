@@ -4,7 +4,7 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 
 const User = require("../users/users-model");
-const { validateRequestBody, checkUsernameAvailability } = require("../middleware/auth-middleware")
+const { validateRequestBody, checkUsernameAvailability, checkUsernameExists } = require("../middleware/auth-middleware")
 
 const { BCRYPT_ROUNDS, JWT_SECRET } = require("../secrets/index"); // use this secret!
 
@@ -48,8 +48,9 @@ router.post('/register', validateRequestBody, checkUsernameAvailability, (req, r
   */
 });
 
-router.post('/login', validateRequestBody, (req, res, next) => {
+router.post('/login', validateRequestBody, checkUsernameExists, (req, res, next) => {
   let { username, password } = req.body;
+
 
   User.findBy({ username })
     .then(([user]) => {
