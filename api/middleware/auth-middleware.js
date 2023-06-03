@@ -10,16 +10,15 @@ const validateRequestBody = (req, res, next) => {
     const { username, password } = req.body;
 
     if (!username || !password) {
-        return res.status(400).send("username and password required");
+        return res.status(400).json({ message: "username and password required" });
     }
-
     next();
 };
 
 const checkUsernameAvailability = async (req, res, next) => {
     try {
         const [user] = await User.findBy({ username: req.body.username });
-        if (!user) {
+        if (user) {
             return res.status(400).json({ message: "username taken" });
         } else {
             req.user = user;
@@ -33,5 +32,4 @@ const checkUsernameAvailability = async (req, res, next) => {
 module.exports = {
     validateRequestBody,
     checkUsernameAvailability
-
 }

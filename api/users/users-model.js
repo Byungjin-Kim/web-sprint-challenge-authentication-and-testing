@@ -7,11 +7,12 @@ module.exports = {
 
 async function insert(user) {
     const [id] = await db('users').insert(user);
-    return db('users').where({ id }).first();
+    const newUser = await db('users').where('id', id).first();
+    return newUser
 }
 
 async function findBy(filter) {
-    return await db("users")
-        .select("username", "password")
-        .where(filter);
+    return await db('users')
+        .select('username')
+        .where(filter)
 }
