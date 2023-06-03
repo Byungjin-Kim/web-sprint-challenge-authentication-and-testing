@@ -10,8 +10,8 @@ async function insert(user) {
     return db('users').where({ id }).first();
 }
 
-function findBy(filter) {
-    return db("users")
-        .select("username")
+async function findBy(filter) {
+    return await db("users")
+        .select("username", "password")
         .where(filter);
 }
