@@ -1,11 +1,8 @@
 // Write your tests here
-
 const request = require('supertest');
 const db = require('../data/dbConfig');
 const server = require('./server');
 const bcrypt = require('bcryptjs');
-
-// const { BCRYPT_ROUNDS } = require("../api/secrets/index"); // use this secret!
 
 beforeAll(async () => {
   await db.migrate.rollback();
@@ -59,6 +56,29 @@ describe('[POST] /register', () => {
   });
 });
 
+describe('[POST] /api/auth/login', () => {
+  it('responds with the correct message on valid credentials', async () => {
+    await request(server).post('/api/auth/register').send(validUser);
+    const res = await request(server).post('/api/auth/login').send(validUser)
+    expect(res.body.message).toMatch(/welcome, Captain Marvel/i)
+    expect(res.status).toBe(200);
+  }, 750);
+  it('responds with proper status and message if a client tries to register without password', async () => {
+    let res = await request(server).post('/api/auth/login').send(invalidUser1);
+    expect(res.body.message).toMatch(/username and password required/i);
+    expect(res.status).toBe(400);
+  });
+  it('responds with proper status and message if a client tries to register without username', async () => {
+    let res = await request(server).post('/api/auth/login').send(invalidUser2);
+    expect(res.body.message).toMatch(/username and password required/i);
+    expect(res.status).toBe(400);
+  });
+  it('requests with invalid credentials with user obtain the user details', async () => {
+    let res = await request(server).post('/api/auth/login').send(validUser);
+    expect(res.body).toMatchObject({ message: "invalid credentials" });
+  });
+});
+
 describe('[GET] /api/jokes', () => {
   it('requests without a token are bounced with proper status and message', async () => {
     const res = await request(server).get('/api/jokes');
@@ -68,17 +88,4 @@ describe('[GET] /api/jokes', () => {
     const res = await request(server).get('/api/jokes').set('Authorization', 'foobar')
     expect(res.body.message).toMatch(/token invalid/i)
   }, 750);
-  it('requests with invalid credentials with user obtain the user details', async () => {
-    let res = await request(server).post('/api/auth/login').send(validUser);
-    expect(res.body).toMatchObject({ message: "invalid credentials" });
-  });
 });
-
-// describe('[POST] /api/auth/login', () => {
-
-//   it('responds with the correct message on valid credentials', async () => {
-//     await request(server).post('/api/auth/register').send(validUser);
-//     const captainMarvel = await db('users').where('username', 'Captain Marvel').first();
-//     expect(captainMarvel.body.message).toBe('welcome, Captain Marvel')
-//   })
-// })
