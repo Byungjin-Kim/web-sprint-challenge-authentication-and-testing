@@ -17,11 +17,13 @@ afterAll(async () => {
 
 // valid User Info.
 const validUser = { username: "Captain Marvel", password: "1234" }
+// invalid User Info.
+const invalidUser1 = { username: "Ken", password: "" }
+const invalidUser2 = { username: "", password: "4321" }
 
 
-
-test('sanity', () => {
-  expect(true).toBe(true)
+test('sanity check', () => {
+  expect(true).not.toBe(false);
 });
 
 describe('server.js', () => {
@@ -37,5 +39,21 @@ describe('[POST] /register', () => {
     expect(res.body.username).toBe('Captain Marvel');
     expect(res.status).toBe(201);
   });
-});
+  it('responds with proper status and message if a client tries to register without password', async () => {
+    let res = await request(server).post('/api/auth/register').send(invalidUser1);
+    expect(res.body.message).toMatch(/username and password required/i);
+    expect(res.status).toBe(400);
+  });
+  it('responds with proper status and message if a client tries to register without username', async () => {
+    let res = await request(server).post('/api/auth/register').send(invalidUser2);
+    expect(res.body.message).toMatch(/username and password required/i);
+    expect(res.status).toBe(400);
+  });
+})
 
+describe('[GET] /api/jokes', () => {
+  it('requests without a token are bounced with proper status and message', async () => {
+    const res = await request(server).get('/api/jokes');
+    expect(res.body.message).toMatch(/token required/i);
+  }, 750);
+});
