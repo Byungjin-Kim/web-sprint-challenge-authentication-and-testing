@@ -4,6 +4,7 @@ const db = require('../data/dbConfig');
 const server = require('./server');
 const bcrypt = require('bcryptjs');
 
+
 beforeAll(async () => {
   await db.migrate.rollback();
   await db.migrate.latest();
@@ -15,11 +16,15 @@ afterAll(async () => {
   await db.destroy();
 });
 
+
 // valid User Info.
-const validUser = { username: "Captain Marvel", password: "1234" }
+const validUser = { username: "Captain Marvel", password: "1234", };
+
 // invalid User Info.
-const invalidUser1 = { username: "Ken", password: "" }
-const invalidUser2 = { username: "", password: "4321" }
+const invalidUser1 = { username: "Ken", password: "" };
+const invalidUser2 = { username: "", password: "4321" };
+
+const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6IktpbSIsImlhdCI6MTY4NjMyMTU4MSwiZXhwIjoxNjg2NDA3OTgxfQ.GCrJZz2Oc2fOGBXlog-Mhz7B1Vx5MT3EU6KgcHWrthQ'
 
 
 test('sanity check', () => {
@@ -87,5 +92,13 @@ describe('[GET] /api/jokes', () => {
   it('requests with an invalid token are bounced with proper status and message', async () => {
     const res = await request(server).get('/api/jokes').set('Authorization', 'foobar')
     expect(res.body.message).toMatch(/token invalid/i)
+  }, 750);
+  it(`obtain the information of jokes correctly`, async () => {
+    await request(server).post('/api/auth/register').send(validUser);
+    const res = await request(server).post('/api/auth/login').send(validUser)
+    const auth = await request(server).get('/api/jokes').set('Authorization', token)
+    expect(res.body.message).toMatch(/welcome, Captain Marvel/i)
+    expect(res.status).toBe(200);
+    expect(auth.status).toBe(200);
   }, 750);
 });
