@@ -12,7 +12,6 @@ async function insert(user) {
 }
 
 async function findBy(filter) {
-    // console.log(filter)
     return await db('users')
         .select('username', 'password')
         .where(filter)
